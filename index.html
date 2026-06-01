@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio — Data & Business Analyst</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <!-- Your Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- EmailJS SDK — sends form to your Gmail -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+
+  <!-- ───────── NAV ───────── -->
+  <nav>
+    <div class="nav-logo">Abhii Analyst</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="Abhishek kumar resume.pdf">Resume</a></li>
+    </ul>
+  </nav>
+  
+
+  <!-- ───────── HERO ───────── -->
+  <section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-content">
+      <p class="hero-tag"> Data & Business Analyst · India</p>
+      <h2 class="hero-name"> Abhishek Kumar</h2>
+      <div class="hero-badges">
+        <span class="badge badge-job"><span class="dot"></span> Open to Full-Time Roles</span>
+        <span class="badge badge-freelance"><span class="dot"></span> Open to Freelance</span>
+      </div>
+      <h1>Turning <span class="accent">Raw Data</span> Into <span class="accent2">Real</span> Decisions</h1>
+      <p class="hero-sub">Data & Business Analyst skilled in MySQL, Python, Power BI and Excel — building dashboards, insights, and strategies that actually move the needle.</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">↗ Hire Me</a>
+        <a href="#projects" class="btn btn-secondary">View Projects</a>
+        <a href="Abhishek kumar resume.pdf" download class="btn btn-secondary">⬇ Download Resume</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SKILLS TICKER ───────── -->
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span class="ticker-item"><span>→</span> MySQL</span>
+      <span class="ticker-item"><span>→</span> Python</span>
+      <span class="ticker-item"><span>→</span> Power BI</span>
+      <span class="ticker-item"><span>→</span> Excel</span>
+      <span class="ticker-item"><span>→</span> Pandas</span>
+      <span class="ticker-item"><span>→</span> Matplotlib</span>
+      <span class="ticker-item"><span>→</span> Pivot Tables</span>
+      <span class="ticker-item"><span>→</span> EDA </span>
+      <span class="ticker-item"><span>→</span> Data Visualization</span>
+      <span class="ticker-item"><span>→</span> Business Analytics</span>
+      <span class="ticker-item"><span>→</span> AWS (Learning)</span>
+      <!-- duplicated for seamless loop -->
+      <span class="ticker-item"><span>→</span> MySQL</span>
+      <span class="ticker-item"><span>→</span> Python</span>
+      <span class="ticker-item"><span>→</span> Power BI</span>
+      <span class="ticker-item"><span>→</span> Excel</span>
+      <span class="ticker-item"><span>→</span> Pandas</span>
+      <span class="ticker-item"><span>→</span> Matplotlib</span>
+      <span class="ticker-item"><span>→</span> Pivot Tables</span>
+      <span class="ticker-item"><span>→</span> EDA </span>
+      <span class="ticker-item"><span>→</span> Data Visualization</span>
+      <span class="ticker-item"><span>→</span> Business Analytics</span>
+      <span class="ticker-item"><span>→</span> AWS (Learning)</span>
+    </div>
+  </div>
+
+  <!-- ───────── ABOUT ───────── -->
+  <section id="about">
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p class="section-label"> About Me</p>
+        <h2 class="section-title">Data Nerd.<br>Business Minded.</h2>
+        <p>I'm a <strong>Data & Business Analyst</strong> passionate about finding the story inside messy spreadsheets and turning it into clear, actionable insights. I love combining technical skills with business thinking to solve real problems.</p>
+        <p>From writing complex SQL queries and building Python pipelines to crafting Power BI dashboards that executives actually understand — I do it all. Currently expanding my cloud skills with <strong>AWS</strong>.</p>
+        <p>I'm actively <strong>looking for full-time opportunities</strong> and also <strong>open to freelance projects</strong> — whether it's a one-time dashboard build or an ongoing analytics partnership.</p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card">
+          <div class="stat-num">SQL</div>
+          <div class="stat-label">Primary Query Language</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">POWER BI</div>
+          <div class="stat-label">Power BI Dashboards</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">PYTHON</div>
+          <div class="stat-label">Python Analytics Stack</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">EXCEL</div>
+          <div class="stat-label">Excel Power User</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SKILLS ───────── -->
+  <section id="skills">
+    <p class="section-label reveal">Skills</p>
+    <h2 class="section-title reveal">My Toolkit</h2>
+    <div class="skills-categories reveal">
+
+      <div class="skill-category">
+        <h3>Databases & Querying</h3>
+        <div class="skills-row">
+          <div class="skill-pill"><span class="skill-icon">🗄️</span> MySQL</div>
+          <div class="skill-pill"><span class="skill-icon">🔍</span> SQL Queries</div>
+          <div class="skill-pill"><span class="skill-icon">⚙️</span> Joins & Subqueries</div>
+          <div class="skill-pill"><span class="skill-icon">📊</span> Aggregations</div>
+        </div>
+      </div>
+
+      <div class="skill-category">
+        <h3>Python & Libraries</h3>
+        <div class="skills-row">
+          <div class="skill-pill"><span class="skill-icon">🐍</span> Python</div>
+          <div class="skill-pill"><span class="skill-icon">🐼</span> Pandas</div>
+          <div class="skill-pill"><span class="skill-icon">📈</span> Matplotlib</div>
+          <div class="skill-pill"><span class="skill-icon">🔢</span> NumPy</div>
+        </div>
+      </div>
+
+      <div class="skill-category">
+        <h3>BI & Visualization</h3>
+        <div class="skills-row">
+          <div class="skill-pill"><span class="skill-icon">⚡</span> Power BI</div>
+          <div class="skill-pill"><span class="skill-icon">📉</span> DAX</div>
+          <div class="skill-pill"><span class="skill-icon">🎨</span> Data Visualization</div>
+          <div class="skill-pill"><span class="skill-icon">📋</span> Dashboarding</div>
+        </div>
+      </div>
+
+      <div class="skill-category">
+        <h3>Excel</h3>
+        <div class="skills-row">
+          <div class="skill-pill"><span class="skill-icon">📗</span> Excel</div>
+          <div class="skill-pill"><span class="skill-icon">↔️</span> VLOOKUP / HLOOKUP</div>
+          <div class="skill-pill"><span class="skill-icon">🔄</span> Pivot Tables</div>
+          <div class="skill-pill"><span class="skill-icon">📊</span> Charts & Visualization</div>
+          <div class="skill-pill"><span class="skill-icon">🧮</span> Complex Formulas</div>
+        </div>
+      </div>
+
+      <div class="skill-category">
+        <h3>Currently Learning</h3>
+        <div class="skills-row">
+          <div class="skill-pill learning"><span class="skill-icon">☁️</span> AWS</div>
+          <div class="skill-pill learning"><span class="skill-icon">🏗️</span> Cloud Analytics</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ───────── PROJECTS ───────── -->
+  <section id="projects">
+    <p class="section-label reveal">Projects</p>
+    <h2 class="section-title reveal">Featured Work</h2>
+    <div class="projects-grid reveal">
+
+      <div class="project-card">
+        <div class="project-num">01</div>
+        <div class="project-tags">
+          <span class="project-tag">Power BI</span>
+          <span class="project-tag">Python</span>
+          <span class="project-tag">Dashboard</span>
+        </div>
+        <h3>BrewMatrics</h3>
+        <p>What's selling, who's buying, and when do they come in? BrewMetrics answers all three — tracking revenue by time of day, product performance, customer type (new vs repeat vs loyal), and city-wise retention across a 20K customer base..</p>
+        <a href="brewmatrics.html"  class="project-link">View Project →</a>
+      </div>
+
+      <div class="project-card">
+        <div class="project-num">02</div>
+        <div class="project-tags">
+          <span class="project-tag">Python</span>
+          <span class="project-tag">Pandas</span>
+          <span class="project-tag">Matplotlib</span>
+        </div>
+        <h3>Customer Churn Analysis</h3>
+        <p>Analysed 49,950 users to find a 28.89% churn rate driven by low app engagement and inactivity. Low-value customers churn the most (36.97%), while medium-value are the most retained (17.04%). Built to give retention teams a clear, segment-level action plan.
+
+.</p>
+        <a href="customer_churn.html" class="project-link">View Project →</a>
+      </div>
+
+      <div class="project-card">
+        <div class="project-num">03</div>
+        <div class="project-tags">
+          <span class="project-tag">MySQL</span>
+          <span class="project-tag">SQL</span>
+        </div>
+        <h3>Campaign Analysis</h3>
+        <p>Tracked ₹17.7M in campaign revenue across 6 marketing channels. Google Ads delivered the highest ROI (7.03) at the lowest CPC (₹1.29), while Email drained budget with a 2.01 ROI. Built to help marketing teams cut spend on weak channels.</p>
+        <a href="campagin.html" class="project-link">View Project →</a>
+      </div>
+
+      <div class="project-card">
+        <div class="project-num">04</div>
+        <div class="project-tags">
+          <span class="project-tag">Excel</span>
+          <span class="project-tag">Pivot Tables</span>
+          <span class="project-tag">VLOOKUP</span>
+        </div>
+        <h3>Retail Analyse</h3>
+        <p>A 2-page Power BI dashboard analysing ₹15.4L in retail revenue across 12,362 orders (2022–2024) — tracking category performance, online vs in-store splits, and seasonal trends. Backed by a SQL data cleaning pipeline</p>
+        <a href="retail.html" class="project-link">View Project →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ───────── CONTACT ───────── -->
+  <section id="contact">
+    <div class="contact-inner reveal">
+      <p class="section-label">Contact</p>
+      <h2 class="section-title">Let's Work<br>Together</h2>
+      <p>Have a project in mind or a role to fill? Whether it's a full-time position or a freelance gig, I'd love to hear about it.</p>
+
+      <!-- id="contact-form" is used by script.js -->
+      <div class="contact-form" id="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="from_name">Your Name</label>
+            <input type="text" id="from_name" name="from_name" placeholder="Alex Johnson" required />
+          </div>
+          <div class="form-group">
+            <label for="reply_to">Email Address</label>
+            <input type="email" id="reply_to" name="reply_to" placeholder="alex@company.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" placeholder="Job Opportunity / Freelance Project" required />
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Tell me about the role or project..." required></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" id="send-btn" type="button">Send Message ↗</button>
+        <p class="form-status" id="form-status"></p>
+      </div>
+
+      <div class="contact-alts">
+        <a href="mailto:abhishekkumar98delhi@gmail.com" class="contact-alt-link">✉️ abhishekkumar98delhi@gmail.com</a>
+        <a href="www.linkedin.com/in/abhishek-kumar-555918261" class="contact-alt-link" target="_blank">🔗 LinkedIn</a>
+        <a href="https://github.com/yourusername" class="contact-alt-link" target="_blank">🐙 GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── FOOTER ───────── -->
+  <footer>
+    <div class="footer-logo">DA.Portfolio</div>
+    <p>© 2026 · Open to Work · Open to Freelance · Built with passion 🔥</p>
+  </footer>
+
+  <!-- Your JavaScript -->
+  <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Customer Churn Analysis · Abhishek Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+  --bg:      #0a0a0f;
+  --surface: #111118;
+  --card:    #16161f;
+  --accent:  #f5c518;
+  --accent2: #ff5f40;
+  --green-lt: #2dcc6a;
+  --text:    #e8e8f0;
+  --muted:   #6b6b80;
+  --border:  rgba(245, 197, 24, 0.15);
+  --glow:    rgba(245, 197, 24, 0.08);
+}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:  var(--bg);
+      color:       var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size:   16px;
+      line-height: 1.6;
+      overflow-x:  hidden;
+    }
+
+    .topbar {
+      position:        fixed;
+      top: 0; left: 0; right: 0;
+      z-index:         100;
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         1rem 3rem;
+      background:      rgba(10,15,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom:   1px solid var(--border);
+      animation:       fadeDown 0.5s ease both;
+    }
+    .back-link {
+      display:         flex;
+      align-items:     center;
+      gap:             0.5rem;
+      color:           var(--muted);
+      text-decoration: none;
+      font-size:       0.82rem;
+      font-weight:     600;
+      letter-spacing:  1px;
+      text-transform:  uppercase;
+      transition:      color 0.2s;
+    }
+    .back-link:hover { color: var(--green-lt); }
+    .topbar-title {
+      font-family:    'Bebas Neue', sans-serif;
+      font-size:      1.3rem;
+      color:          var(--green-lt);
+      letter-spacing: 3px;
+    }
+    .topbar-badge {
+      font-family:    'JetBrains Mono', monospace;
+      font-size:      0.7rem;
+      color:          var(--accent);
+      background:     rgba(245,197,24,0.1);
+      border:         1px solid rgba(245,197,24,0.25);
+      padding:        0.25rem 0.75rem;
+      border-radius:  100px;
+      letter-spacing: 1px;
+    }
+
+    .hero {
+      min-height:      100vh;
+      display:         flex;
+      flex-direction:  column;
+      justify-content: center;
+      padding:         8rem 3rem 4rem;
+      position:        relative;
+      overflow:        hidden;
+    }
+    .hero-bg-grid {
+      position:         absolute; inset: 0; opacity: 0.03;
+      background-image:
+        linear-gradient(var(--green-lt) 1px, transparent 1px),
+        linear-gradient(90deg, var(--green-lt) 1px, transparent 1px);
+      background-size:  50px 50px;
+    }
+    .hero-blob { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
+    .blob1 { width:600px; height:600px; background:rgba(30,122,62,0.07); top:-150px; right:-150px; }
+    .blob2 { width:400px; height:400px; background:rgba(245,197,24,0.04); bottom:0; left:5%; }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    .hero-meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0.3rem 0.8rem; border-radius: 4px;
+    }
+    .meta-tag.tool  { background: rgba(30,122,62,0.15); color: var(--green-lt); border: 1px solid var(--border); }
+    .meta-tag.year  { background: rgba(245,197,24,0.1);  color: var(--accent);   border: 1px solid rgba(245,197,24,0.2); }
+    .meta-tag.type  { background: rgba(255,255,255,0.05); color: var(--muted);   border: 1px solid rgba(255,255,255,0.08); }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.9; letter-spacing: 2px; color: var(--text);
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero h1 .g { color: var(--green-lt); }
+    .hero h1 .a { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted); max-width: 620px;
+      margin-top: 1.5rem; font-weight: 300; line-height: 1.8;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .kpi-strip {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 3rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem 1.75rem;
+      position: relative; overflow: hidden; min-width: 150px;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green-lt));
+    }
+    .kpi-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; color: var(--green-lt); line-height: 1;
+    }
+    .kpi-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.5px; }
+
+    .section { padding: 5rem 3rem; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--accent);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1; letter-spacing: 1px; margin-bottom: 2.5rem;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0 3rem; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: start;
+    }
+    .overview-grid p { color: var(--muted); font-size: 1rem; line-height: 1.85; margin-bottom: 1rem; }
+    .overview-grid p strong { color: var(--text); }
+
+    .objective-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+    .objective-list li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      color: var(--muted); font-size: 0.95rem;
+    }
+    .objective-list li::before {
+      content: '→'; color: var(--green-lt);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; margin-top: 2px; flex-shrink: 0;
+    }
+
+    .dashboard-img { width:100%; height:auto; display:block; border-radius:10px; }
+    .pages-grid { display: flex; flex-direction: column; gap: 4rem; }
+
+    .page-block { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .page-block.reverse { direction: rtl; }
+    .page-block.reverse > * { direction: ltr; }
+
+    .page-img-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    .page-img-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--glow), transparent);
+      z-index: 1; pointer-events: none;
+    }
+    .page-img-placeholder {
+      aspect-ratio: 16/9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; padding: 2rem; text-align: center;
+    }
+    .page-num-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem; color: var(--border); line-height: 1;
+    }
+    .page-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .page-img-wrap img { width: 100%; display: block; border-radius: 10px; }
+
+    .page-info .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-top: 1rem; margin-bottom: 0.5rem;
+    }
+    .page-info h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; letter-spacing: 1px; margin-bottom: 1rem;
+    }
+    .page-info p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+
+    .finding-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+    .finding-list li {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .finding-list li .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-lt); margin-top: 7px; flex-shrink: 0;
+    }
+
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .insight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .insight-card:hover { transform: translateY(-4px); border-color: var(--green-lt); }
+    .insight-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .insight-card h4 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: 1px;
+      color: var(--green-lt); margin-bottom: 0.5rem;
+    }
+    .insight-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+    .tools-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .tool-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.4rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .tool-pill:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+    .tool-pill span { font-size: 1.1rem; }
+
+    .learnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .learning-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--green-lt); border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .learning-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+    .learning-card p  { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    .cta-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 4rem 3rem; text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; font-weight: 600; font-size: 0.9rem;
+      border-radius: 4px; text-decoration: none; transition: all 0.25s; border: none;
+    }
+    .btn-green   { background: var(--green-lt); color: #0a0f0a; }
+    .btn-green:hover { background: #3dcc6a; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+
+    footer {
+      padding: 1.5rem 3rem; display: flex; align-items: center;
+      justify-content: space-between; border-top: 1px solid var(--border);
+    }
+    footer p { font-size: 0.8rem; color: var(--muted); }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; color: var(--green-lt); letter-spacing: 3px;
+    }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+
+    @media (max-width: 768px) {
+      .topbar        { padding: 1rem 1.5rem; }
+      .topbar-title  { display: none; }
+      .hero          { padding: 7rem 1.5rem 3rem; }
+      .section       { padding: 3.5rem 1.5rem; }
+      .overview-grid, .page-block, .learnings-grid { grid-template-columns: 1fr; }
+      .page-block.reverse { direction: ltr; }
+      .divider       { margin: 0 1.5rem; }
+      footer         { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+    <div class="topbar-title">Customer Churn</div>
+    <span class="topbar-badge">Power BI · Python Project</span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-inner">
+      <div class="hero-meta">
+        <span class="meta-tag tool">Power BI</span>
+        <span class="meta-tag tool">Python</span>
+        <span class="meta-tag tool">DAX</span>
+        <span class="meta-tag tool">Data Analytics</span>
+        <span class="meta-tag year">2026</span>
+        <span class="meta-tag type">1-Page Dashboard</span>
+      </div>
+      <h1><span class="g">Customer</span><br><span class="a">Churn</span></h1>
+      <p class="hero-sub">A comprehensive Power BI dashboard analysing customer churn across 49,950 users — uncovering churn drivers, segment-level attrition, app engagement patterns, and quarterly retention trends.</p>
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-val">28.89%</div>
+          <div class="kpi-label">Churn Rate</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">49,950</div>
+          <div class="kpi-label">Total Users</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">1,440.59</div>
+          <div class="kpi-label">Avg. Customer Lifetime Value</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">13.00</div>
+          <div class="kpi-label">Avg. Purchase Amount</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">36.97%</div>
+          <div class="kpi-label">Low-Value Churn Rate</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">1</div>
+          <div class="kpi-label">Dashboard Pages</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- OVERVIEW -->
+  <div class="section reveal">
+    <p class="section-label">Project Overview</p>
+    <h2 class="section-title">What & Why</h2>
+    <div class="overview-grid">
+      <div>
+        <p>Customer Churn Analysis is a <strong>single-page business intelligence dashboard</strong> built in Power BI, backed by a Python data cleaning pipeline, to analyse churn behaviour across a base of 49,950 customers.</p>
+        <p>The goal was to go beyond raw churn numbers — telling a data story that helps business stakeholders make decisions around <strong>retention strategy, customer segmentation, re-engagement campaigns, and lifetime value optimisation.</strong></p>
+        <p>Every visual on the dashboard answers a specific business question, with actionable insights surfaced directly in the insight panel.</p>
+      </div>
+      <div>
+        <p style="margin-bottom:0.75rem; color: var(--text); font-weight:600;">Business Objectives</p>
+        <ul class="objective-list">
+          <li>Identify which customer segments churn the most</li>
+          <li>Understand how app engagement relates to attrition</li>
+          <li>Track quarterly churn trends and seasonal patterns</li>
+          <li>Surface the gap between purchasing behaviour of churned vs retained users</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- PROBLEMS & HOW I FIXED THEM -->
+  <div class="section">
+    <p class="section-label reveal">Challenges</p>
+    <h2 class="section-title reveal">Problems & How I Fixed Them</h2>
+
+    <div class="pages-grid">
+      <section class="dashboard-pages">
+
+        <!-- PROBLEM 1 -->
+        <div class="page-block reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">01</div>
+              <div class="page-name">Missing & Dirty Data</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 01</p>
+            <h3>Missing & Inconsistent Data</h3>
+            <p>The raw dataset had null values scattered across engagement scores, purchase history columns, and customer segment labels — causing skewed churn calculations and unreliable visual outputs in Power BI.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> Null values in engagement score and purchase amount fields</li>
+              <li><span class="dot"></span> Inconsistent data types across date and numeric columns</li>
+              <li><span class="dot"></span> Duplicate customer records inflating total user count</li>
+              <li><span class="dot"></span> Missing segment labels for a subset of users</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Built a Python (Pandas) cleaning pipeline — median imputation for numeric nulls, mode imputation for categoricals, deduplication, and dtype enforcement — before importing into Power BI.</p>
+          </div>
+        </div>
+
+        <!-- PROBLEM 2 -->
+        <div class="page-block reverse reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">02</div>
+              <div class="page-name">No Churn Flag</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 02</p>
+            <h3>No Churn Definition in Data</h3>
+            <p>The dataset had no binary churn column. Without a clear churn flag, none of the Power BI visuals could be built — every metric depended on first defining what "churned" actually means for this business context.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> No churn label or target variable existed in raw data</li>
+              <li><span class="dot"></span> Had to align on a business-driven inactivity threshold</li>
+              <li><span class="dot"></span> Recency of last purchase needed to be calculated per user</li>
+              <li><span class="dot"></span> Edge cases (new customers, seasonal buyers) required handling</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Engineered an <code style="color:var(--accent); font-size:0.85rem;">is_churned</code> binary column in Python — customers with 60+ days since last purchase and zero recent activity were flagged as churned, then imported as a clean feature into the Power BI model.</p>
+          </div>
+        </div>
+
+        <!-- PROBLEM 3 -->
+        <div class="page-block reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">03</div>
+              <div class="page-name">Misleading Segment Rates</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 03</p>
+            <h3>Segment Sizes Made Rates Misleading</h3>
+            <p>Low-value customers dominated the dataset by volume, making their raw churn count appear similar to other segments. Simple counts were misleading — the real story was in churn rate per segment, not absolute numbers.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> Low-value segment was 3× larger than high-value</li>
+              <li><span class="dot"></span> Raw count charts gave false impression of equal risk across segments</li>
+              <li><span class="dot"></span> Needed normalised, per-segment churn rate measures</li>
+              <li><span class="dot"></span> DAX context transitions were tricky across segment filters</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Wrote independent CALCULATE-based DAX measures for each value segment, computing churn rate as churned ÷ total per segment — ensuring the Segmented Attrition bar chart reflects fair, normalised comparison (17% med · 32.5% high · 37% low).</p>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section reveal">
+    <p class="section-label">Key Insights</p>
+    <h2 class="section-title">What the Data Said</h2>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <h4>Low-Value Customers Churn Most</h4>
+        <p>Low-value customers churn at 36.97% — the highest across all segments — indicating price sensitivity and a weak emotional connection to the product.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">⚠️</div>
+        <h4>High-Value Churn is a Hidden Risk</h4>
+        <p>High-value customers churn at 32.54%, suggesting post-intensive-usage disengagement. These users need proactive retention offers before they go silent.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📱</div>
+        <h4>App Engagement Predicts Churn</h4>
+        <p>Users with low app engagement score average 20.5 churn events vs 16.3 for high-engagement users. App stickiness is a leading churn indicator — not a lagging one.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📅</div>
+        <h4>Q2 is Peak Churn Quarter</h4>
+        <p>Quarterly trends show churn peaked in Q2 (~29.8%) before declining steadily through Q4. Seasonal churn is predictable and can be countered with Q1–Q2 retention campaigns.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🛒</div>
+        <h4>Churned Users Buy Less Before Leaving</h4>
+        <p>Churned users average 11.3 purchases vs 13.7 for retained users. Purchase frequency drops before churn occurs — this is an early-warning signal that can trigger intervention.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🕐</div>
+        <h4>52-Day Inactivity = Danger Zone</h4>
+        <p>Churned customers average 52 days since last purchase vs 42 for active users. A 45-day re-engagement trigger (push/email) could intercept churn before it becomes permanent.</p>
+      </div>
+    </div>
+  </div>
+
+    <!-- PDF REPORT -->
+<div class="section reveal">
+  <p class="section-label">Full Report</p>
+  <h2 class="section-title">The Report</h2>
+  <div class="page-img-wrap" style="padding: 1rem;">
+    <embed src="customer churn dashboard.pdf" type="application/pdf" width="100%" height="700px" style="border-radius:8px;" />
+  </div>
+</div>
+
+  <!-- DASHBOARD IMAGE -->
+<div class="section reveal">
+  <p class="section-label">Dashboard</p>
+  <h2 class="section-title">The Dashboard</h2>
+  <div class="page-img-wrap">
+    <img src="customer_churn.png" alt="Customer Churn Dashboard" class="dashboard-img">
+  </div>
+</div>
+
+  <hr class="divider"/>
+
+  <!-- TOOLS USED -->
+  <div class="section reveal">
+    <p class="section-label">Tools & Skills Used</p>
+    <h2 class="section-title">Built With</h2>
+    <div class="tools-row">
+      <div class="tool-pill"><span>⚡</span> Power BI Desktop</div>
+      <div class="tool-pill"><span>🐍</span> Python (Pandas)</div>
+      <div class="tool-pill"><span>📐</span> DAX Formulas</div>
+      <div class="tool-pill"><span>🔗</span> Data Modelling</div>
+      <div class="tool-pill"><span>📊</span> Data Visualization</div>
+      <div class="tool-pill"><span>🧹</span> Data Cleaning</div>
+      <div class="tool-pill"><span>📋</span> KPI Design</div>
+      <div class="tool-pill"><span>🎯</span> Customer Segmentation</div>
+      <div class="tool-pill"><span>💡</span> Business Insight Storytelling</div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- LEARNINGS -->
+  <div class="section reveal">
+    <p class="section-label">What I Learned</p>
+    <h2 class="section-title">Key Takeaways</h2>
+    <div class="learnings-grid">
+      <div class="learning-card">
+        <h4>Python Before Power BI</h4>
+        <p>Cleaning data in Pandas before importing into Power BI dramatically reduces DAX complexity and prevents misleading visuals from dirty source data — getting the foundation right matters most.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Churn Needs a Business Definition First</h4>
+        <p>There's no universal churn formula. I had to align on a business rule (60-day inactivity) before any analysis could begin. Domain thinking must come before technical execution.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Segment Context Changes Everything</h4>
+        <p>A 32% churn rate looks alarming — until you realise it's your high-value segment who engaged heavily before disengaging. The "so what" only emerges when metrics are broken down by segment.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Leading vs Lagging Indicators</h4>
+        <p>Purchase frequency drop and app disengagement are leading indicators of churn. Building visuals around these leading signals enables proactive action, not just post-mortem reporting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Like What You See?</h2>
+    <p>I'm open to full-time roles and internships in Data & Business Analytics.</p>
+    <div class="cta-btns">
+      <a href="index.html#contact" class="btn btn-green">↗ Hire Me</a>
+      <a href="index.html#projects" class="btn btn-outline">← Other Projects</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Customer Churn</div>
+    <p>A project by Abhishek Kumar · D.A Portfolio</p>
+  </footer>
+
+  <script>
+    const reveals  = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BrewMatrics Cafe · Abhishek Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+  --bg:      #0a0a0f;
+  --surface: #111118;
+  --card:    #16161f;
+  --accent:  #f5c518;
+  --accent2: #ff5f40;
+  --green-lt: #2dcc6a;
+  --text:    #e8e8f0;
+  --muted:   #6b6b80;
+  --border:  rgba(245, 197, 24, 0.15);
+  --glow:    rgba(245, 197, 24, 0.08);
+}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:  var(--bg);
+      color:       var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size:   16px;
+      line-height: 1.6;
+      overflow-x:  hidden;
+    }
+
+    .topbar {
+      position:        fixed;
+      top: 0; left: 0; right: 0;
+      z-index:         100;
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         1rem 3rem;
+      background:      rgba(10,15,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom:   1px solid var(--border);
+      animation:       fadeDown 0.5s ease both;
+    }
+    .back-link {
+      display:         flex;
+      align-items:     center;
+      gap:             0.5rem;
+      color:           var(--muted);
+      text-decoration: none;
+      font-size:       0.82rem;
+      font-weight:     600;
+      letter-spacing:  1px;
+      text-transform:  uppercase;
+      transition:      color 0.2s;
+    }
+    .back-link:hover { color: var(--green-lt); }
+    .topbar-title {
+      font-family:    'Bebas Neue', sans-serif;
+      font-size:      1.3rem;
+      color:          var(--green-lt);
+      letter-spacing: 3px;
+    }
+    .topbar-badge {
+      font-family:    'JetBrains Mono', monospace;
+      font-size:      0.7rem;
+      color:          var(--accent);
+      background:     rgba(245,197,24,0.1);
+      border:         1px solid rgba(245,197,24,0.25);
+      padding:        0.25rem 0.75rem;
+      border-radius:  100px;
+      letter-spacing: 1px;
+    }
+
+    .hero {
+      min-height:      100vh;
+      display:         flex;
+      flex-direction:  column;
+      justify-content: center;
+      padding:         8rem 3rem 4rem;
+      position:        relative;
+      overflow:        hidden;
+    }
+    .hero-bg-grid {
+      position:         absolute; inset: 0; opacity: 0.03;
+      background-image:
+        linear-gradient(var(--green-lt) 1px, transparent 1px),
+        linear-gradient(90deg, var(--green-lt) 1px, transparent 1px);
+      background-size:  50px 50px;
+    }
+    .hero-blob { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
+    .blob1 { width:600px; height:600px; background:rgba(30,122,62,0.07); top:-150px; right:-150px; }
+    .blob2 { width:400px; height:400px; background:rgba(245,197,24,0.04); bottom:0; left:5%; }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    .hero-meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0.3rem 0.8rem; border-radius: 4px;
+    }
+    .meta-tag.tool  { background: rgba(30,122,62,0.15); color: var(--green-lt); border: 1px solid var(--border); }
+    .meta-tag.year  { background: rgba(245,197,24,0.1);  color: var(--accent);   border: 1px solid rgba(245,197,24,0.2); }
+    .meta-tag.type  { background: rgba(255,255,255,0.05); color: var(--muted);   border: 1px solid rgba(255,255,255,0.08); }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.9; letter-spacing: 2px; color: var(--text);
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero h1 .g { color: var(--green-lt); }
+    .hero h1 .a { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted); max-width: 620px;
+      margin-top: 1.5rem; font-weight: 300; line-height: 1.8;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .kpi-strip {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 3rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem 1.75rem;
+      position: relative; overflow: hidden; min-width: 150px;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green-lt));
+    }
+    .kpi-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; color: var(--green-lt); line-height: 1;
+    }
+    .kpi-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.5px; }
+
+    .section { padding: 5rem 3rem; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--accent);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1; letter-spacing: 1px; margin-bottom: 2.5rem;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0 3rem; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: start;
+    }
+    .overview-grid p { color: var(--muted); font-size: 1rem; line-height: 1.85; margin-bottom: 1rem; }
+    .overview-grid p strong { color: var(--text); }
+
+    .objective-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+    .objective-list li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      color: var(--muted); font-size: 0.95rem;
+    }
+    .objective-list li::before {
+      content: '→'; color: var(--green-lt);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; margin-top: 2px; flex-shrink: 0;
+    }
+
+    .dashboard-img { width:100%; height:auto; display:block; border-radius:10px; }
+    .pages-grid { display: flex; flex-direction: column; gap: 4rem; }
+
+    .page-block { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .page-block.reverse { direction: rtl; }
+    .page-block.reverse > * { direction: ltr; }
+
+    .page-img-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    .page-img-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--glow), transparent);
+      z-index: 1; pointer-events: none;
+    }
+    .page-img-placeholder {
+      aspect-ratio: 16/9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; padding: 2rem; text-align: center;
+    }
+    .page-num-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem; color: var(--border); line-height: 1;
+    }
+    .page-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .page-img-wrap img { width: 100%; display: block; border-radius: 10px; }
+
+    .page-info .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-top: 1rem; margin-bottom: 0.5rem;
+    }
+    .page-info h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; letter-spacing: 1px; margin-bottom: 1rem;
+    }
+    .page-info p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+
+    .finding-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+    .finding-list li {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .finding-list li .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-lt); margin-top: 7px; flex-shrink: 0;
+    }
+
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .insight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .insight-card:hover { transform: translateY(-4px); border-color: var(--green-lt); }
+    .insight-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .insight-card h4 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: 1px;
+      color: var(--green-lt); margin-bottom: 0.5rem;
+    }
+    .insight-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+    .tools-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .tool-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.4rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .tool-pill:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+    .tool-pill span { font-size: 1.1rem; }
+
+    .learnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .learning-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--green-lt); border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .learning-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+    .learning-card p  { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    .cta-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 4rem 3rem; text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; font-weight: 600; font-size: 0.9rem;
+      border-radius: 4px; text-decoration: none; transition: all 0.25s; border: none;
+    }
+    .btn-green   { background: var(--green-lt); color: #0a0f0a; }
+    .btn-green:hover { background: #3dcc6a; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+
+    footer {
+      padding: 1.5rem 3rem; display: flex; align-items: center;
+      justify-content: space-between; border-top: 1px solid var(--border);
+    }
+    footer p { font-size: 0.8rem; color: var(--muted); }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; color: var(--green-lt); letter-spacing: 3px;
+    }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+
+    @media (max-width: 768px) {
+      .topbar        { padding: 1rem 1.5rem; }
+      .topbar-title  { display: none; }
+      .hero          { padding: 7rem 1.5rem 3rem; }
+      .section       { padding: 3.5rem 1.5rem; }
+      .overview-grid, .page-block, .learnings-grid { grid-template-columns: 1fr; }
+      .page-block.reverse { direction: ltr; }
+      .divider       { margin: 0 1.5rem; }
+      footer         { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+    <div class="topbar-title">BrewMatrics</div>
+    <span class="topbar-badge">Power BI Project · MySQL · Python Project </span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-inner">
+      <div class="hero-meta">
+        <span class="meta-tag tool">Power BI</span>
+        <span class="meta-tag tool">DAX</span>
+        <span class="meta-tag tool">Data Analytics</span>
+        <span class="meta-tag year">2026</span>
+        <span class="meta-tag type">3-Page Dashboard</span>
+      </div>
+      <h1><span class="g">Brew</span><span class="a">Metrics</span></h1>
+      <p class="hero-sub">A comprehensive 3-page Power BI dashboard analysing BrewMatrics operations — uncovering revenue patterns, store performance, customer behaviour, and product insights across ₹17.763k in total sales.</p>
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-val">₹17.763k</div>
+          <div class="kpi-label">Total Revenue</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">30K</div>
+          <div class="kpi-label">Total Orders</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">592.10</div>
+          <div class="kpi-label">Average order value</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">57%</div>
+          <div class="kpi-label">Repeating Customers</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">59929</div>
+          <div class="kpi-label"> Quantity Sold</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">3</div>
+          <div class="kpi-label">Dashboard Pages</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- OVERVIEW -->
+  <div class="section reveal">
+    <p class="section-label"> Project Overview</p>
+    <h2 class="section-title">What & Why</h2>
+    <div class="overview-grid">
+      <div>
+        <p>BrewMatrics is a <strong>multi-page business intelligence dashboard</strong> built in Power BI to analyse the operational and financial performance of Starbucks India stores across a 3-month period (January–March).</p>
+        <p>The goal was to go beyond raw numbers — telling a data story that helps business stakeholders make decisions around <strong>product strategy, store expansion, customer retention, and revenue optimisation.</strong></p>
+        <p>Every page answers a specific business question, with actionable insights surfaced directly on the dashboard.</p>
+      </div>
+      <div>
+        <p style="margin-bottom:0.75rem; color: var(--text); font-weight:600;">Business Objectives</p>
+        <ul class="objective-list">
+          <li>Identify top-performing stores and revenue drivers</li>
+          <li>Understand sales patterns by time of day</li>
+          <li>Analyse customer retention and segmentation</li>
+          <li>Surface the gap between high-volume vs high-value products</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- DASHBOARD PAGES -->
+  <div class="section">
+    <p class="section-label reveal"> Dashboard Pages</p>
+    <h2 class="section-title reveal">3 Pages. 3 Stories.</h2>
+
+    <div class="pages-grid">
+
+<section class="dashboard-pages">
+
+    <!-- PAGE 1 -->
+    <div class="page-block reveal">
+
+        <div class="page-img-wrap">
+            <img src="brewmatrics.png" alt="Executive Dashboard" class="dashboard-img">
+        </div>
+
+        <div class="page-info">
+            <p class="page-label">Page 01</p>
+
+            <h3>Executive Dashboard</h3>
+
+            <p>
+                The Executive Dashboard provides a comprehensive overview of business
+                performance through key metrics such as Total Revenue, Total Orders,
+                Average Order Value (AOV), and monthly sales trends. This page helps
+                stakeholders quickly evaluate overall business health and identify
+                growth opportunities.
+            </p>
+
+            <ul class="finding-list">
+                <li><span class="dot"></span> Revenue and profit performance tracking</li>
+                <li><span class="dot"></span> Monthly sales trend analysis</li>
+                <li><span class="dot"></span> Top-performing products identification</li>
+                <li><span class="dot"></span> Peak sales period monitoring</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page-block reveal">
+
+        <div class="page-img-wrap">
+            <img src="brewmatrics_customer.png" alt="Customer Analytics Dashboard" class="dashboard-img">
+        </div>
+
+        <div class="page-info">
+            <p class="page-label">Page 02</p>
+
+            <h3>Customer Analytics</h3>
+
+            <p>
+                The Customer Analytics dashboard focuses on customer behavior,
+                purchasing patterns, and customer segmentation. It helps businesses
+                understand customer preferences, customer lifetime value, and
+                retention opportunities.
+            </p>
+
+            <ul class="finding-list">
+                <li><span class="dot"></span> Customer segmentation analysis</li>
+                <li><span class="dot"></span> Repeat vs new customer comparison</li>
+                <li><span class="dot"></span> Regional customer distribution</li>
+                <li><span class="dot"></span> Customer purchasing behavior insights</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="page-block reveal">
+
+        <div class="page-img-wrap">
+            <img src="brewmatics_product.png" alt="Product Analytics Dashboard" class="dashboard-img">
+        </div>
+
+        <div class="page-info">
+            <p class="page-label">Page 03</p>
+
+            <h3>Product Analytics</h3>
+
+            <p>
+                The Product Analytics dashboard evaluates product performance
+                across different categories. It highlights revenue contribution,
+                sales volume, profitability, and identifies the products driving
+                the highest business value.
+            </p>
+
+            <ul class="finding-list">
+                <li><span class="dot"></span> Top-selling product analysis</li>
+                <li><span class="dot"></span> Revenue contribution by category</li>
+                <li><span class="dot"></span> Product profitability tracking</li>
+                <li><span class="dot"></span> Category performance comparison</li>
+            </ul>
+        </div>
+
+    </div>
+
+</section>
+
+
+  <hr class="divider"/>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section reveal">
+    <p class="section-label"> Key Insights</p>
+    <h2 class="section-title">What the Data Said</h2>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">📍</div>
+        <h4>Location is Everything</h4>
+        <p>Mall stores generate ₹11.1M vs ₹2.2M for Airport, Corporate, and Standalone — proving that footfall location is the biggest revenue lever.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">☀️</div>
+        <h4>Morning Drives Sales</h4>
+        <p>The Morning period acts as the primary revenue generator for the cafe. Conversely, Lunch represents the lowest revenue period by time of day, highlighting a distinct gap where mid-day promotions or bundled food-pairing offers could drive traffic.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📦</div>
+        <h4>Volume vs. Premium Pricing Dynamics</h4>
+        <p>Top-performing products generate high revenue through a powerful mix of strong sales volume and stable average pricing rather than premium pricing alone. This points to consistent, high-volume customer demand for core favorites.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🔁</div>
+        <h4>Customer</h4>
+        <p>Revenue is driven by repeat customers through higher order frequency , while AOV remains consistent across segment , and customer contribution is evenly distributed across cities.
+Additionally a small group of top customers contributes
+a significant share of revenue , highlighting a
+concentration risk and an opportunity to improve new
+customer retention..</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">☕</div>
+        <h4>Product</h4>
+        <p>Revenue is primarily driven by coffee categories , with Hot and Cold Coffee contributing the major share.
+Top-performing products generate high revenue through combination of strong sales volume and stable average pricing ,
+indicating consistent customer demand rather than premium pricing alone.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📅</div>
+        <h4>February Dip Pattern</h4>
+        <p>Revenue fell ~7% in February across all stores. This seasonal dip is predictable and could be countered with targeted February-specific campaigns.</p>
+      </div>
+    </div>
+  </div>
+  <!-- PDF REPORT -->
+<div class="section reveal">
+  <p class="section-label">Full Report</p>
+  <h2 class="section-title">The Report</h2>
+  <div class="page-img-wrap" style="padding: 1rem;">
+    <embed src="brewmetrics.pdf" type="application/pdf" width="100%" height="700px" style="border-radius:8px;" />
+  </div>
+</div>
+
+    <!-- DASHBOARD IMAGE -->
+<div class="section reveal">
+  <p class="section-label">Dashboard</p>
+  <h2 class="section-title">The Dashboard</h2>
+  <div style="display: flex; flex-direction: column; gap: 2rem;">
+    <div class="page-img-wrap">
+      <img src="brewmatrics.png" alt="BrewMatrics Sales Dashboard Page 1" class="dashboard-img">
+    </div>
+    <div class="page-img-wrap">
+      <img src="brewmatics_product.png" alt="BrewMatrics Sales Dashboard Page 2" class="dashboard-img">
+    </div>
+    <div class="page-img-wrap">
+      <img src="brewmatrics_customer.png" alt="BrewMatrics Sales Dashboard Page 2" class="dashboard-img">
+    </div>
+  </div>
+</div>
+  <hr class="divider"/>
+
+  <hr class="divider"/>
+
+  <!-- TOOLS USED -->
+  <div class="section reveal">
+    <p class="section-label"> Tools & Skills Used</p>
+    <h2 class="section-title">Built With</h2>
+    <div class="tools-row">
+      <div class="tool-pill"><span>⚡</span> Power BI Desktop</div>
+      <div class="tool-pill"><span>📐</span> DAX Formulas</div>
+      <div class="tool-pill"><span>🔗</span> Data Modelling</div>
+      <div class="tool-pill"><span>📊</span> Data Visualization</div>
+      <div class="tool-pill"><span>🧹</span> Data Cleaning</div>
+      <div class="tool-pill"><span>📋</span> KPI Design</div>
+      <div class="tool-pill"><span>🗂️</span> Multi-page Reporting</div>
+      <div class="tool-pill"><span>💡</span> Business Insight Storytelling</div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- LEARNINGS -->
+  <div class="section reveal">
+    <p class="section-label"> What I Learned</p>
+    <h2 class="section-title">Key Takeaways</h2>
+    <div class="learnings-grid">
+      <div class="learning-card">
+        <h4>Dashboard Structure Matters</h4>
+        <p>Breaking a complex dataset into 3 focused pages — each answering one business question — makes insights far more digestible for stakeholders than a single crowded view.</p>
+      </div>
+      <div class="learning-card">
+        <h4>DAX for Dynamic KPIs</h4>
+        <p>Writing DAX measures for AOV, repeating customer rate, and category revenue deepened my understanding of calculated columns vs measures and context transition.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Insight-First Design</h4>
+        <p>Adding an INSIGHT text box on each page — summarising the "so what" — taught me that data dashboards must guide decisions, not just display numbers.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Volume vs Value Thinking</h4>
+        <p>The Americano paradox (most ordered, lowest revenue) showed me why analysing both quantity and revenue together reveals insights that neither metric alone can surface.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Like What You See?</h2>
+    <p>I'm open to full-time roles and freelance projects in Data & Business Analytics.</p>
+    <div class="cta-btns">
+      <a href="index.html#contact" class="btn btn-green">↗ Hire Me</a>
+      <a href="index.html#projects" class="btn btn-outline">← Other Projects</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">BrewMatrics</div>
+    <p>A project by Abhishek Kumar · D.A Portfolio</p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals  = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

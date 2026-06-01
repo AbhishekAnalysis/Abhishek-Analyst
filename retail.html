@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retail Sales Analysis · Abhishek Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0a0a0f;
+      --surface: #111118;
+      --card:    #16161f;
+      --accent:  #f5c518;
+      --accent2: #ff5f40;
+      --green-lt: #2dcc6a;
+      --text:    #e8e8f0;
+      --muted:   #6b6b80;
+      --border:  rgba(245, 197, 24, 0.15);
+      --glow:    rgba(245, 197, 24, 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:  var(--bg);
+      color:       var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size:   16px;
+      line-height: 1.6;
+      overflow-x:  hidden;
+    }
+
+    .topbar {
+      position:        fixed;
+      top: 0; left: 0; right: 0;
+      z-index:         100;
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         1rem 3rem;
+      background:      rgba(10,15,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom:   1px solid var(--border);
+      animation:       fadeDown 0.5s ease both;
+    }
+    .back-link {
+      display:         flex;
+      align-items:     center;
+      gap:             0.5rem;
+      color:           var(--muted);
+      text-decoration: none;
+      font-size:       0.82rem;
+      font-weight:     600;
+      letter-spacing:  1px;
+      text-transform:  uppercase;
+      transition:      color 0.2s;
+    }
+    .back-link:hover { color: var(--green-lt); }
+    .topbar-title {
+      font-family:    'Bebas Neue', sans-serif;
+      font-size:      1.3rem;
+      color:          var(--green-lt);
+      letter-spacing: 3px;
+    }
+    .topbar-badge {
+      font-family:    'JetBrains Mono', monospace;
+      font-size:      0.7rem;
+      color:          var(--accent);
+      background:     rgba(245,197,24,0.1);
+      border:         1px solid rgba(245,197,24,0.25);
+      padding:        0.25rem 0.75rem;
+      border-radius:  100px;
+      letter-spacing: 1px;
+    }
+
+    .hero {
+      min-height:      100vh;
+      display:         flex;
+      flex-direction:  column;
+      justify-content: center;
+      padding:         8rem 3rem 4rem;
+      position:        relative;
+      overflow:        hidden;
+    }
+    .hero-bg-grid {
+      position:         absolute; inset: 0; opacity: 0.03;
+      background-image:
+        linear-gradient(var(--green-lt) 1px, transparent 1px),
+        linear-gradient(90deg, var(--green-lt) 1px, transparent 1px);
+      background-size:  50px 50px;
+    }
+    .hero-blob { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
+    .blob1 { width:600px; height:600px; background:rgba(30,122,62,0.07); top:-150px; right:-150px; }
+    .blob2 { width:400px; height:400px; background:rgba(245,197,24,0.04); bottom:0; left:5%; }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    .hero-meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0.3rem 0.8rem; border-radius: 4px;
+    }
+    .meta-tag.tool  { background: rgba(30,122,62,0.15); color: var(--green-lt); border: 1px solid var(--border); }
+    .meta-tag.year  { background: rgba(245,197,24,0.1);  color: var(--accent);   border: 1px solid rgba(245,197,24,0.2); }
+    .meta-tag.type  { background: rgba(255,255,255,0.05); color: var(--muted);   border: 1px solid rgba(255,255,255,0.08); }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.9; letter-spacing: 2px; color: var(--text);
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero h1 .g { color: var(--green-lt); }
+    .hero h1 .a { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted); max-width: 620px;
+      margin-top: 1.5rem; font-weight: 300; line-height: 1.8;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .kpi-strip {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 3rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem 1.75rem;
+      position: relative; overflow: hidden; min-width: 150px;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green-lt));
+    }
+    .kpi-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; color: var(--green-lt); line-height: 1;
+    }
+    .kpi-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.5px; }
+
+    .section { padding: 5rem 3rem; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--accent);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1; letter-spacing: 1px; margin-bottom: 2.5rem;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0 3rem; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: start;
+    }
+    .overview-grid p { color: var(--muted); font-size: 1rem; line-height: 1.85; margin-bottom: 1rem; }
+    .overview-grid p strong { color: var(--text); }
+
+    .objective-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+    .objective-list li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      color: var(--muted); font-size: 0.95rem;
+    }
+    .objective-list li::before {
+      content: '→'; color: var(--green-lt);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; margin-top: 2px; flex-shrink: 0;
+    }
+
+    .dashboard-img { width:100%; height:auto; display:block; border-radius:10px; }
+    .pages-grid { display: flex; flex-direction: column; gap: 4rem; }
+
+    .page-block { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .page-block.reverse { direction: rtl; }
+    .page-block.reverse > * { direction: ltr; }
+
+    .page-img-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    .page-img-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--glow), transparent);
+      z-index: 1; pointer-events: none;
+    }
+    .page-img-placeholder {
+      aspect-ratio: 16/9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; padding: 2rem; text-align: center;
+    }
+    .page-num-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem; color: var(--border); line-height: 1;
+    }
+    .page-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .page-img-wrap img { width: 100%; display: block; border-radius: 10px; }
+
+    .page-info .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-top: 1rem; margin-bottom: 0.5rem;
+    }
+    .page-info h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; letter-spacing: 1px; margin-bottom: 1rem;
+    }
+    .page-info p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+
+    .finding-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+    .finding-list li {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .finding-list li .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-lt); margin-top: 7px; flex-shrink: 0;
+    }
+
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .insight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .insight-card:hover { transform: translateY(-4px); border-color: var(--green-lt); }
+    .insight-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .insight-card h4 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: 1px;
+      color: var(--green-lt); margin-bottom: 0.5rem;
+    }
+    .insight-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+    .tools-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .tool-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.4rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .tool-pill:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+    .tool-pill span { font-size: 1.1rem; }
+
+    .learnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .learning-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--green-lt); border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .learning-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+    .learning-card p  { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    .cta-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 4rem 3rem; text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; font-weight: 600; font-size: 0.9rem;
+      border-radius: 4px; text-decoration: none; transition: all 0.25s; border: none;
+    }
+    .btn-green   { background: var(--green-lt); color: #0a0f0a; }
+    .btn-green:hover { background: #3dcc6a; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+
+    footer {
+      padding: 1.5rem 3rem; display: flex; align-items: center;
+      justify-content: space-between; border-top: 1px solid var(--border);
+    }
+    footer p { font-size: 0.8rem; color: var(--muted); }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; color: var(--green-lt); letter-spacing: 3px;
+    }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+
+    @media (max-width: 768px) {
+      .topbar        { padding: 1rem 1.5rem; }
+      .topbar-title  { display: none; }
+      .hero          { padding: 7rem 1.5rem 3rem; }
+      .section       { padding: 3.5rem 1.5rem; }
+      .overview-grid, .page-block, .learnings-grid { grid-template-columns: 1fr; }
+      .page-block.reverse { direction: ltr; }
+      .divider       { margin: 0 1.5rem; }
+      footer         { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+    <div class="topbar-title">Retail Sales</div>
+    <span class="topbar-badge">Power BI · SQL Project</span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-inner">
+      <div class="hero-meta">
+        <span class="meta-tag tool">Power BI</span>
+        <span class="meta-tag tool">SQL</span>
+        <span class="meta-tag tool">DAX</span>
+        <span class="meta-tag tool">Data Analytics</span>
+        <span class="meta-tag year">2026</span>
+        <span class="meta-tag type">2-Page Dashboard</span>
+      </div>
+      <h1><span class="g">Retail</span><br><span class="a">Sales</span></h1>
+      <p class="hero-sub">A multi-page Power BI dashboard analysing retail performance across 12,362 orders (2022–2024) — uncovering revenue trends, category profitability, location splits, and seasonal patterns across online and in-store channels.</p>
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-val">₹15.4L</div>
+          <div class="kpi-label">Total Revenue (2022–2024)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">12,362</div>
+          <div class="kpi-label">Total Orders</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">65,779</div>
+          <div class="kpi-label">Quantity Sold</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">124.62</div>
+          <div class="kpi-label">Avg. Order Value (AOV)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">51.01%</div>
+          <div class="kpi-label">Online Revenue Share</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">2</div>
+          <div class="kpi-label">Dashboard Pages</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- OVERVIEW -->
+  <div class="section reveal">
+    <p class="section-label">Project Overview</p>
+    <h2 class="section-title">What & Why</h2>
+    <div class="overview-grid">
+      <div>
+        <p>Retail Sales Analysis is a <strong>two-page business intelligence dashboard</strong> built in Power BI, backed by a SQL data cleaning pipeline, to analyse sales performance across 12,362 orders spanning 2022 to 2024.</p>
+        <p>The goal was to move beyond surface-level revenue numbers — building a data story that equips business stakeholders to make decisions around <strong>category strategy, channel investment, seasonal planning, and location-based performance.</strong></p>
+        <p>Every visual on the dashboard answers a specific business question, with YoY growth rates and category comparisons surfaced directly on each page.</p>
+      </div>
+      <div>
+        <p style="margin-bottom:0.75rem; color: var(--text); font-weight:600;">Business Objectives</p>
+        <ul class="objective-list">
+          <li>Track yearly and monthly revenue trends with growth rate annotations</li>
+          <li>Compare online vs in-store revenue contribution across periods</li>
+          <li>Identify top and bottom performing product categories</li>
+          <li>Understand the relationship between quantity sold and revenue by category</li>
+          <li>Provide an early 2025 January indicator without distorting 3-year comparisons</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- PROBLEMS & HOW I FIXED THEM -->
+  <div class="section">
+    <p class="section-label reveal">Challenges</p>
+    <h2 class="section-title reveal">Problems & How I Fixed Them</h2>
+
+    <div class="pages-grid">
+      <section class="dashboard-pages">
+
+        <!-- PROBLEM 1 -->
+        <div class="page-block reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">01</div>
+              <div class="page-name">Inconsistent Dates & Nulls</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 01</p>
+            <h3>Inconsistent Dates & Null Records</h3>
+            <p>The raw retail dataset contained order date fields stored as mixed text and date types, NULL values in revenue and quantity columns, and orphaned records with no category mapping — all of which caused incorrect YoY growth calculations and broken bar chart aggregations in Power BI.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> Order dates stored as VARCHAR instead of DATE — broke time-series grouping</li>
+              <li><span class="dot"></span> NULL values in <code style="color:var(--accent);font-size:0.85rem">total_revenue</code> and <code style="color:var(--accent);font-size:0.85rem">quantity_sold</code> fields skewing aggregations</li>
+              <li><span class="dot"></span> Orphaned order rows with no matching category — excluded from category charts silently</li>
+              <li><span class="dot"></span> Duplicate order IDs inflating total order count beyond true 12,362</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Wrote SQL cleaning queries — <code style="color:var(--accent);font-size:0.85rem">CAST(order_date AS DATE)</code> to enforce type consistency, <code style="color:var(--accent);font-size:0.85rem">COALESCE</code> to replace NULLs with 0, <code style="color:var(--accent);font-size:0.85rem">LEFT JOIN</code> audit to flag orphaned records, and <code style="color:var(--accent);font-size:0.85rem">ROW_NUMBER()</code> deduplication — producing a clean staging table before import into Power BI.</p>
+          </div>
+        </div>
+
+        <!-- PROBLEM 2 -->
+        <div class="page-block reverse reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">02</div>
+              <div class="page-name">Partial-Year 2025 Distortion</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 02</p>
+            <h3>Partial 2025 Data Distorting Trends</h3>
+            <p>January 2025 data existed in the source table (₹25,875 revenue) but including it in the main 2022–2024 trend visuals caused the yearly bar chart to show a massive artificial drop for 2025 — misleading any stakeholder reading year-on-year growth.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> 2025 (Jan only) pulled into the yearly aggregation, making it appear as a steep decline</li>
+              <li><span class="dot"></span> No flag to distinguish full-year vs partial-year records in the source data</li>
+              <li><span class="dot"></span> Monthly chart also affected — December 2024 vs January 2025 comparison was misleading</li>
+              <li><span class="dot"></span> Needed a way to show the 2025 data without corrupting the 3-year trend analysis</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Added a <code style="color:var(--accent);font-size:0.85rem">is_full_year</code> SQL flag using a <code style="color:var(--accent);font-size:0.85rem">CASE WHEN YEAR(order_date) &lt; 2025</code> condition, then filtered main visuals to full years only. A separate KPI card surfaces 2025 January revenue with an explicit "early indicator" annotation — matching the dashboard's "About 2025" callout.</p>
+          </div>
+        </div>
+
+        <!-- PROBLEM 3 -->
+        <div class="page-block reveal">
+          <div class="page-img-wrap">
+            <div class="page-img-placeholder">
+              <div class="page-num-big">03</div>
+              <div class="page-name">Category Revenue vs Qty Mismatch</div>
+            </div>
+          </div>
+          <div class="page-info">
+            <p class="page-label">Problem 03</p>
+            <h3>Category Names Mismatched Across Tables</h3>
+            <p>Product category labels were stored inconsistently across the orders table and the product reference table — "Electronic household essentials" appeared as "Electronic HH Ess." in one table and "Elec. Household" in another — causing JOIN failures that silently dropped entire categories from the revenue vs quantity scatter chart.</p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> 3 category name variants for the same product group across two tables</li>
+              <li><span class="dot"></span> <code style="color:var(--accent);font-size:0.85rem">INNER JOIN</code> on category name dropped unmatched rows silently — no error raised</li>
+              <li><span class="dot"></span> "Computers and electronic accessories" missing entirely from scatter chart</li>
+              <li><span class="dot"></span> Bottom 3 category rankings were incorrect due to missing data</li>
+            </ul>
+            <p style="margin-top:1rem;"><strong style="color:var(--text)">Fix:</strong> Used SQL <code style="color:var(--accent);font-size:0.85rem">TRIM(LOWER(category_name))</code> normalisation on both tables before joining, replaced the <code style="color:var(--accent);font-size:0.85rem">INNER JOIN</code> with a <code style="color:var(--accent);font-size:0.85rem">LEFT JOIN</code> plus a <code style="color:var(--accent);font-size:0.85rem">WHERE matched IS NOT NULL</code> audit step — ensuring all 8 categories appeared correctly in both the top/bottom rankings and the revenue vs quantity scatter.</p>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section reveal">
+    <p class="section-label">Key Insights</p>
+    <h2 class="section-title">What the Data Said</h2>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">📈</div>
+        <h4>Revenue Grew 6.95% in 2023</h4>
+        <p>After a flat 2022 baseline, revenue grew 6.95% in 2023 before dipping 3.89% in 2024 — signalling a potential market saturation or competitive pressure that warrants investigation.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🥩</div>
+        <h4>Butchers is the Top Category</h4>
+        <p>Butchers leads all categories in revenue, followed closely by Electronic Household Essentials and Beverages — indicating that perishable goods drive the most transaction volume despite lower average prices.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🖥️</div>
+        <h4>Computers Underperform vs Quantity</h4>
+        <p>The Revenue vs Quantity scatter reveals Computers and Electronic Accessories generates lower revenue relative to units sold — suggesting either aggressive discounting or lower-priced SKU mix dominating the category.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🌐</div>
+        <h4>Online Narrowly Leads In-Store</h4>
+        <p>Online revenue (51.01%, ₹785.87K) edges out in-store (48.99%, ₹754.63K) — the near-parity suggests both channels are equally critical, and neither should be deprioritised in budget planning.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📅</div>
+        <h4>March & December are Peak Months</h4>
+        <p>Monthly revenue annotations show positive growth in March (+2.49%) and December (+5.96%), while September (-6.26%) and November (-7.47%) are consistent weak spots — ideal windows for seasonal promotions.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🥛</div>
+        <h4>Milk Products & Patisserie Lag Behind</h4>
+        <p>Milk Products and Patisserie consistently rank in the bottom 3 categories by revenue. These categories may benefit from bundling strategies or targeted promotions to improve their contribution margin.</p>
+      </div>
+    </div>
+  </div>
+    <!-- PDF REPORT -->
+<div class="section reveal">
+  <p class="section-label">Full Report</p>
+  <h2 class="section-title">The Report</h2>
+  <div class="page-img-wrap" style="padding: 1rem;">
+    <embed src="retail.pdf" type="application/pdf" width="100%" height="700px" style="border-radius:8px;" />
+  </div>
+</div>
+
+  <!-- DASHBOARD IMAGE -->
+<div class="section reveal">
+  <p class="section-label">Dashboard</p>
+  <h2 class="section-title">The Dashboard</h2>
+  <div style="display: flex; flex-direction: column; gap: 2rem;">
+    <div class="page-img-wrap">
+      <img src="retail_over.png" alt="Retail Sales Dashboard Page 1" class="dashboard-img">
+    </div>
+    <div class="page-img-wrap">
+      <img src="retail_prodcut.png" alt="Retail Sales Dashboard Page 2" class="dashboard-img">
+    </div>
+  </div>
+</div>
+  <hr class="divider"/>
+
+  <!-- TOOLS USED -->
+  <div class="section reveal">
+    <p class="section-label">Tools & Skills Used</p>
+    <h2 class="section-title">Built With</h2>
+    <div class="tools-row">
+      <div class="tool-pill"><span>⚡</span> Power BI Desktop</div>
+      <div class="tool-pill"><span>🗄️</span> SQL (Data Cleaning)</div>
+      <div class="tool-pill"><span>📐</span> DAX Formulas</div>
+      <div class="tool-pill"><span>🔗</span> Data Modelling</div>
+      <div class="tool-pill"><span>📊</span> Data Visualization</div>
+      <div class="tool-pill"><span>🧹</span> Data Cleaning</div>
+      <div class="tool-pill"><span>📋</span> KPI Design</div>
+      <div class="tool-pill"><span>🗂️</span> Category Analysis</div>
+      <div class="tool-pill"><span>💡</span> Business Insight Storytelling</div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- LEARNINGS -->
+  <div class="section reveal">
+    <p class="section-label">What I Learned</p>
+    <h2 class="section-title">Key Takeaways</h2>
+    <div class="learnings-grid">
+      <div class="learning-card">
+        <h4>SQL Before Power BI</h4>
+        <p>Cleaning and normalising data in SQL before importing into Power BI keeps DAX measures clean and prevents silent data loss from failed JOINs — the foundation determines the accuracy of every visual built on top of it.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Partial-Year Data Needs Explicit Handling</h4>
+        <p>Including incomplete year data in trend charts misleads stakeholders. Isolating partial years with a flag and presenting them separately as "early indicators" is a cleaner, more honest approach to evolving datasets.</p>
+      </div>
+      <div class="learning-card">
+        <h4>INNER JOIN Silently Drops Data</h4>
+        <p>Using INNER JOIN without auditing for unmatched rows is a silent data quality risk. Always validating JOINs with a LEFT JOIN + NULL check step caught missing categories that would have gone unnoticed in the final dashboard.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Revenue Alone Doesn't Tell the Full Story</h4>
+        <p>Plotting revenue against quantity sold in a scatter chart revealed categories that were high-volume but low-value — a dimension invisible in a simple ranked bar chart. Combining metrics surfaces strategy-level insights.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Like What You See?</h2>
+    <p>I'm open to full-time roles and internships in Data & Business Analytics.</p>
+    <div class="cta-btns">
+      <a href="index.html#contact" class="btn btn-green">↗ Hire Me</a>
+      <a href="index.html#projects" class="btn btn-outline">← Other Projects</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Retail Sales</div>
+    <p>A project by Abhishek Kumar · D.A Portfolio</p>
+  </footer>
+
+  <script>
+    const reveals  = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

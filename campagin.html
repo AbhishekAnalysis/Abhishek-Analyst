@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campaign Analytics · Abhishek Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+  --bg:      #0a0a0f;
+  --surface: #111118;
+  --card:    #16161f;
+  --accent:  #f5c518;
+  --accent2: #ff5f40;
+  --green-lt: #2dcc6a;
+  --text:    #e8e8f0;
+  --muted:   #6b6b80;
+  --border:  rgba(245, 197, 24, 0.15);
+  --glow:    rgba(245, 197, 24, 0.08);
+}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:  var(--bg);
+      color:       var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size:   16px;
+      line-height: 1.6;
+      overflow-x:  hidden;
+    }
+
+    .topbar {
+      position:        fixed;
+      top: 0; left: 0; right: 0;
+      z-index:         100;
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      padding:         1rem 3rem;
+      background:      rgba(10,15,10,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom:   1px solid var(--border);
+      animation:       fadeDown 0.5s ease both;
+    }
+    .back-link {
+      display:         flex;
+      align-items:     center;
+      gap:             0.5rem;
+      color:           var(--muted);
+      text-decoration: none;
+      font-size:       0.82rem;
+      font-weight:     600;
+      letter-spacing:  1px;
+      text-transform:  uppercase;
+      transition:      color 0.2s;
+    }
+    .back-link:hover { color: var(--green-lt); }
+    .topbar-title {
+      font-family:    'Bebas Neue', sans-serif;
+      font-size:      1.3rem;
+      color:          var(--green-lt);
+      letter-spacing: 3px;
+    }
+    .topbar-badge {
+      font-family:    'JetBrains Mono', monospace;
+      font-size:      0.7rem;
+      color:          var(--accent);
+      background:     rgba(245,197,24,0.1);
+      border:         1px solid rgba(245,197,24,0.25);
+      padding:        0.25rem 0.75rem;
+      border-radius:  100px;
+      letter-spacing: 1px;
+    }
+
+    .hero {
+      min-height:      100vh;
+      display:         flex;
+      flex-direction:  column;
+      justify-content: center;
+      padding:         8rem 3rem 4rem;
+      position:        relative;
+      overflow:        hidden;
+    }
+    .hero-bg-grid {
+      position:         absolute; inset: 0; opacity: 0.03;
+      background-image:
+        linear-gradient(var(--green-lt) 1px, transparent 1px),
+        linear-gradient(90deg, var(--green-lt) 1px, transparent 1px);
+      background-size:  50px 50px;
+    }
+    .hero-blob { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
+    .blob1 { width:600px; height:600px; background:rgba(30,122,62,0.07); top:-150px; right:-150px; }
+    .blob2 { width:400px; height:400px; background:rgba(245,197,24,0.04); bottom:0; left:5%; }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+    .hero-meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .meta-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 0.3rem 0.8rem; border-radius: 4px;
+    }
+    .meta-tag.tool  { background: rgba(30,122,62,0.15); color: var(--green-lt); border: 1px solid var(--border); }
+    .meta-tag.year  { background: rgba(245,197,24,0.1);  color: var(--accent);   border: 1px solid rgba(245,197,24,0.2); }
+    .meta-tag.type  { background: rgba(255,255,255,0.05); color: var(--muted);   border: 1px solid rgba(255,255,255,0.08); }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.9; letter-spacing: 2px; color: var(--text);
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero h1 .g { color: var(--green-lt); }
+    .hero h1 .a { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted); max-width: 620px;
+      margin-top: 1.5rem; font-weight: 300; line-height: 1.8;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .kpi-strip {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: 3rem;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .kpi {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.25rem 1.75rem;
+      position: relative; overflow: hidden; min-width: 150px;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green-lt));
+    }
+    .kpi-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; color: var(--green-lt); line-height: 1;
+    }
+    .kpi-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.5px; }
+
+    .section { padding: 5rem 3rem; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--accent);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1; letter-spacing: 1px; margin-bottom: 2.5rem;
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0 3rem; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: start;
+    }
+    .overview-grid p { color: var(--muted); font-size: 1rem; line-height: 1.85; margin-bottom: 1rem; }
+    .overview-grid p strong { color: var(--text); }
+
+    .objective-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
+    .objective-list li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      color: var(--muted); font-size: 0.95rem;
+    }
+    .objective-list li::before {
+      content: '→'; color: var(--green-lt);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; margin-top: 2px; flex-shrink: 0;
+    }
+
+    .dashboard-img { width:100%; height:auto; display:block; border-radius:10px; }
+    .pages-grid { display: flex; flex-direction: column; gap: 4rem; }
+
+    .page-block { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .page-block.reverse { direction: rtl; }
+    .page-block.reverse > * { direction: ltr; }
+
+    .page-img-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    .page-img-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--glow), transparent);
+      z-index: 1; pointer-events: none;
+    }
+    .page-img-placeholder {
+      aspect-ratio: 16/9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; padding: 2rem; text-align: center;
+    }
+    .page-num-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem; color: var(--border); line-height: 1;
+    }
+    .page-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .page-img-wrap img { width: 100%; display: block; border-radius: 10px; }
+
+    .page-info .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--green-lt);
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-top: 1rem; margin-bottom: 0.5rem;
+    }
+    .page-info h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem; letter-spacing: 1px; margin-bottom: 1rem;
+    }
+    .page-info p { color: var(--muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+
+    .finding-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem; }
+    .finding-list li {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .finding-list li .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-lt); margin-top: 7px; flex-shrink: 0;
+    }
+
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .insight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .insight-card:hover { transform: translateY(-4px); border-color: var(--green-lt); }
+    .insight-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .insight-card h4 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: 1px;
+      color: var(--green-lt); margin-bottom: 0.5rem;
+    }
+    .insight-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+    .tools-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .tool-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.4rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+    }
+    .tool-pill:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+    .tool-pill span { font-size: 1.1rem; }
+
+    .learnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .learning-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--green-lt); border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+    }
+    .learning-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+    .learning-card p  { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    .cta-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 4rem 3rem; text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; font-weight: 600; font-size: 0.9rem;
+      border-radius: 4px; text-decoration: none; transition: all 0.25s; border: none;
+    }
+    .btn-green   { background: var(--green-lt); color: #0a0f0a; }
+    .btn-green:hover { background: #3dcc6a; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green-lt); color: var(--green-lt); transform: translateY(-2px); }
+
+    footer {
+      padding: 1.5rem 3rem; display: flex; align-items: center;
+      justify-content: space-between; border-top: 1px solid var(--border);
+    }
+    footer p { font-size: 0.8rem; color: var(--muted); }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; color: var(--green-lt); letter-spacing: 3px;
+    }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+
+    @media (max-width: 768px) {
+      .topbar        { padding: 1rem 1.5rem; }
+      .topbar-title  { display: none; }
+      .hero          { padding: 7rem 1.5rem 3rem; }
+      .section       { padding: 3.5rem 1.5rem; }
+      .overview-grid, .page-block, .learnings-grid { grid-template-columns: 1fr; }
+      .page-block.reverse { direction: ltr; }
+      .divider       { margin: 0 1.5rem; }
+      footer         { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+    <div class="topbar-title">Campaign Analytics</div>
+    <span class="topbar-badge">Power BI  · Python Project </span>
+    
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-inner">
+      <div class="hero-meta">
+        <span class="meta-tag tool">Power BI</span>
+        <span class="meta-tag tool">DAX</span>
+        <span class="meta-tag tool">Marketing Analytics</span>
+        <span class="meta-tag year">2026</span>
+        <span class="meta-tag type">2-Page Dashboard</span>
+      </div>
+      <h1><span class="g">Campaign</span><br><span class="a">Analytics</span></h1>
+      <p class="hero-sub">A 2-page Power BI dashboard analysing marketing campaign performance across 6 channels — uncovering ROI, CTR, CPC, conversion rates, and profitability to guide smarter ad spend decisions.</p>
+      <div class="kpi-strip">
+        <div class="kpi">
+          <div class="kpi-val">₹17,789K</div>
+          <div class="kpi-label">Total Revenue</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">₹6,290K</div>
+          <div class="kpi-label">Total Spend</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">2.83</div>
+          <div class="kpi-label">Return on Investment</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">₹11,498K</div>
+          <div class="kpi-label">Total Profit</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">3.01%</div>
+          <div class="kpi-label">Avg. CTR</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">11.17%</div>
+          <div class="kpi-label">Avg. Conversion Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- OVERVIEW -->
+  <div class="section reveal">
+    <p class="section-label">Project Overview</p>
+    <h2 class="section-title">What & Why</h2>
+    <div class="overview-grid">
+      <div>
+        <p>Campaign Analytics is a <strong>2-page marketing intelligence dashboard</strong> built in Power BI to evaluate the performance and profitability of ad campaigns across Google Ads, Facebook, Instagram, TikTok, Email, and Unknown channels.</p>
+        <p>The goal was to go beyond surface-level metrics — telling a data story that helps marketing stakeholders make decisions around <strong>budget reallocation, channel prioritisation, targeting improvement, and ROI maximisation.</strong></p>
+        <p>Each page answers a distinct business question, with an insight panel surfacing the "so what" directly on the dashboard.</p>
+      </div>
+      <div>
+        <p style="margin-bottom:0.75rem; color: var(--text); font-weight:600;">Business Objectives</p>
+        <ul class="objective-list">
+          <li>Identify which channels generate the highest ROI and profit</li>
+          <li>Compare spend vs revenue across all marketing channels</li>
+          <li>Analyse CTR, CPC, and conversion rate per channel</li>
+          <li>Surface underperforming channels draining budget without returns</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+    <!-- PDF REPORT -->
+<div class="section reveal">
+  <p class="section-label">Full Report</p>
+  <h2 class="section-title">The Report</h2>
+  <div class="page-img-wrap" style="padding: 1rem;">
+    <embed src="CAMPAIGN.pdf" type="application/pdf" width="100%" height="700px" style="border-radius:8px;" />
+  </div>
+</div>
+
+  <!-- DASHBOARD PAGES -->
+  <div class="section">
+    <p class="section-label reveal">Dashboard Pages</p>
+    <h2 class="section-title reveal">2 Pages. 2 Stories.</h2>
+
+    <div class="pages-grid">
+      <section class="dashboard-pages">
+
+        <!-- PAGE 1 -->
+        <div class="page-block reveal">
+          <div class="page-img-wrap">
+           <img src="campagin_profit.png" alt="Campaign Dashboard Page 1" class="dashboard-img">
+          </div>
+          <div class="page-info">
+            <p class="page-label">Page 01</p>
+            <h3>Campaign Performance & Profitability Overview</h3>
+            <p>
+              The first page provides a high-level view of overall campaign health through Total Spend, Total Revenue, ROI, and Total Profit. It breaks down revenue and profit contribution by channel and compares spend vs revenue side by side to reveal which channels deliver the most value per rupee spent.
+            </p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> Total revenue, spend, profit, and ROI KPIs</li>
+              <li><span class="dot"></span> Revenue contribution by channel (bar chart)</li>
+              <li><span class="dot"></span> Profit generated by channel comparison</li>
+              <li><span class="dot"></span> Spend vs Revenue side-by-side by channel</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PAGE 2 -->
+        <div class="page-block reverse reveal">
+          <div class="page-img-wrap">
+            <img src="campagin_channel.png" alt="Campaign Dashboard Page 1" class="dashboard-img">
+          </div>
+          <div class="page-info">
+            <p class="page-label">Page 02</p>
+            <h3>Channel Performance Deep Dive</h3>
+            <p>
+              The second page goes deeper into channel-level efficiency metrics — CTR, CPC, ROI, and Conversion Rate — with a detailed table and individual channel charts. An insight panel summarises the key takeaway for stakeholders at a glance, highlighting winners and underperformers.
+            </p>
+            <ul class="finding-list">
+              <li><span class="dot"></span> CTR and Conversion Rate by channel</li>
+              <li><span class="dot"></span> Cost per Click (CPC) comparison across channels</li>
+              <li><span class="dot"></span> ROI by channel ranked bar chart</li>
+              <li><span class="dot"></span> Channel performance table (CTR, CPC, ROI, Conversion)</li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section reveal">
+    <p class="section-label">Key Insights</p>
+    <h2 class="section-title">What the Data Said</h2>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">🏆</div>
+        <h4>Google Ads Leads ROI</h4>
+        <p>Google Ads delivers an ROI of 7.03 with a low CPC of ₹1.29 — the best performing channel by far. Budget should be prioritised here for maximum return per rupee spent.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📧</div>
+        <h4>Email is the Most Expensive Channel</h4>
+        <p>Email has the highest CPC at ₹3.89 and one of the lowest ROIs at 2.01 — indicating a high cost-per-result relative to other channels. Needs optimisation or reduced spend.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📊</div>
+        <h4>CTR & Conversion Are Nearly Identical</h4>
+        <p>CTR (~3.01%) and Conversion (~11.17%) are almost uniform across all channels, suggesting poor targeting differentiation — a signal that audience segmentation strategy needs revisiting.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📸</div>
+        <h4>Instagram is a Strong #2</h4>
+        <p>Instagram delivers an ROI of 4.50 with a low CPC of ₹1.23 — the second best performer. It combines strong returns with efficient spend, making it a reliable growth channel.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">❓</div>
+        <h4>Unknown Channel Needs Tracking Fix</h4>
+        <p>The "Unknown" channel shows a surprisingly high CTR of 3.25% but an ROI of only 2.03 — indicating untracked traffic that may be misattributed. Tracking validation is critical before scaling.</p>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <h4>Facebook Has Lowest ROI</h4>
+        <p>Facebook ranks last with an ROI of 1.77 and a high CPC of ₹2.84. Despite decent CTR and conversion rates, the cost structure makes it the least efficient channel in the mix.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- TOOLS USED -->
+  <div class="section reveal">
+    <p class="section-label">Tools & Skills Used</p>
+    <h2 class="section-title">Built With</h2>
+    <div class="tools-row">
+      <div class="tool-pill"><span>⚡</span> Power BI Desktop</div>
+      <div class="tool-pill"><span>📐</span> DAX Formulas</div>
+      <div class="tool-pill"><span>🔗</span> Data Modelling</div>
+      <div class="tool-pill"><span>📊</span> Data Visualization</div>
+      <div class="tool-pill"><span>🧹</span> Data Cleaning</div>
+      <div class="tool-pill"><span>📋</span> KPI Design</div>
+      <div class="tool-pill"><span>📣</span> Marketing Analytics</div>
+      <div class="tool-pill"><span>💡</span> Business Insight Storytelling</div>
+      <div class="tool-pill"><span>🗂️</span> Multi-page Reporting</div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- LEARNINGS -->
+  <div class="section reveal">
+    <p class="section-label">What I Learned</p>
+    <h2 class="section-title">Key Takeaways</h2>
+    <div class="learnings-grid">
+      <div class="learning-card">
+        <h4>ROI Alone Doesn't Tell the Full Story</h4>
+        <p>A channel with high ROI but low volume may not scale. Looking at ROI alongside total profit and spend together gives a more complete picture of channel value.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Uniform Metrics Signal a Strategy Problem</h4>
+        <p>When CTR and conversion rates are nearly identical across all channels, it's not a data issue — it's a targeting problem. Analytics revealed a strategic gap, not just a number.</p>
+      </div>
+      <div class="learning-card">
+        <h4>CPC Is a Hidden Budget Killer</h4>
+        <p>Email's high CPC (₹3.89 vs Google Ads' ₹1.29) quietly drains budget. Tracking cost efficiency per click alongside ROI exposed where money was being wasted.</p>
+      </div>
+      <div class="learning-card">
+        <h4>Data Quality Gates Decisions</h4>
+        <p>The "Unknown" channel had strong CTR but no reliable attribution — proving that decisions made on unvalidated data can be misleading. Tracking hygiene is a prerequisite for insight.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Like What You See?</h2>
+    <p>I'm open to full-time roles and internships in Data & Business Analytics.</p>
+    <div class="cta-btns">
+      <a href="index.html#contact" class="btn btn-green">↗ Hire Me</a>
+      <a href="index.html#projects" class="btn btn-outline">← Other Projects</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Campaign Analytics</div>
+    <p>A project by Abhishek Kumar · D.A Portfolio</p>
+  </footer>
+
+  <script>
+    const reveals  = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
